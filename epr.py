@@ -4,14 +4,14 @@ Usage:
     epr.py [EPUBFILE]
 
 Key binding:
-    Help            : h, ?
+    Help            : ?
     Quit            : q
-    Scroll down     : ARROW DOWN
-    Scroll up       : ARROW UP
+    Scroll down     : ARROW DOWN, j
+    Scroll up       : ARROW UP, k
     Page down       : PGUP
     Page up         : PGDN
-    Next chapter    : ARROW RIGHT
-    Prev chapter    : ARROW LEFT
+    Next chapter    : ARROW RIGHT, l
+    Prev chapter    : ARROW LEFT, h
     Beginning of ch : HOME
     End of ch       : END
     Shrink          : -
@@ -64,12 +64,12 @@ def save_config(config):
 config = load_config()
 
 # key bindings
-SCROLL_DOWN = curses.KEY_DOWN
-SCROLL_UP = curses.KEY_UP
+SCROLL_DOWN = [curses.KEY_DOWN, ord("j")]
+SCROLL_UP = [curses.KEY_UP, ord("k")]
 PAGE_DOWN = curses.KEY_NPAGE
 PAGE_UP = curses.KEY_PPAGE
-CH_NEXT = curses.KEY_RIGHT
-CH_PREV = curses.KEY_LEFT
+CH_NEXT = [curses.KEY_RIGHT, ord("l")]
+CH_PREV = [curses.KEY_LEFT, ord("h")]
 CH_HOME = curses.KEY_HOME
 CH_END = curses.KEY_END
 SHRINK = ord("-")
@@ -78,7 +78,7 @@ META = ord("m")
 TOC = ord("t")
 FOLLOW = 10
 QUIT = [ord("q"), 3]
-HELP = [ord("?"), ord("h")]
+HELP = [ord("?")]
 
 parser = html2text.HTML2Text()
 parser.ignore_emphasis = True
@@ -186,10 +186,10 @@ def toc(stdscr, ebook, index, width):
     top = pad(src, index)
 
     while key_toc != TOC and key_toc not in QUIT:
-        if key_toc == SCROLL_UP and index > 0:
+        if key_toc in SCROLL_UP and index > 0:
             index -= 1
             top = pad(src, index, top)
-        if key_toc == SCROLL_DOWN and index + 1 < len(src):
+        if key_toc in SCROLL_DOWN and index + 1 < len(src):
             index += 1
             top = pad(src, index, top)
         if key_toc == FOLLOW:
@@ -226,9 +226,9 @@ def meta(stdscr, ebook):
     pad.refresh(y,0, Y+4,X+4, rows - 5, cols - 6)
 
     while key_meta != META and key_meta not in QUIT:
-        if key_meta == SCROLL_UP and y > 0:
+        if key_meta in SCROLL_UP and y > 0:
             y -= 1
-        if key_meta == SCROLL_DOWN and y < len(src_lines) - hi + 4:
+        if key_meta in SCROLL_DOWN and y < len(src_lines) - hi + 4:
             y += 1
         pad.refresh(y,0, 6,5, rows - 5, cols - 5)
         key_meta = meta.getch()
@@ -260,9 +260,9 @@ def help(stdscr):
     pad.refresh(y,0, Y+4,X+4, rows - 5, cols - 6)
 
     while key_help not in HELP and key_help not in QUIT:
-        if key_help == SCROLL_UP and y > 0:
+        if key_help in SCROLL_UP and y > 0:
             y -= 1
-        if key_help == SCROLL_DOWN and y < len(src_lines) - hi + 4:
+        if key_help in SCROLL_DOWN and y < len(src_lines) - hi + 4:
             y += 1
         if key_help == curses.KEY_RESIZE:
             break
@@ -304,7 +304,7 @@ def reader(stdscr, ebook, index, width, y=0):
             config[ebook.path]["pos"] = str(y)
             save_config(config)
             exit()
-        if k == SCROLL_UP:
+        if k in SCROLL_UP:
             if y > 0:
                 y -= 1
             # if y == 0 and index > 0:
@@ -314,7 +314,7 @@ def reader(stdscr, ebook, index, width, y=0):
                 y -= rows - 2
             else:
                 y = 0
-        if k == SCROLL_DOWN:
+        if k in SCROLL_DOWN:
             if y < len(src_lines) - rows:
                 y += 1
             # if y + rows >= len(src_lines):
@@ -326,9 +326,9 @@ def reader(stdscr, ebook, index, width, y=0):
                 y = len(src_lines) - rows
                 if y < 0:
                     y = 0
-        if k == CH_NEXT and index < len(ebook.get_contents()) - 1:
+        if k in CH_NEXT and index < len(ebook.get_contents()) - 1:
             reader(stdscr, ebook, index+1, width)
-        if k == CH_PREV and index > 0:
+        if k in CH_PREV and index > 0:
             reader(stdscr, ebook, index-1, width)
         if k == CH_HOME:
             y = 0
